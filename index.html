@@ -5,100 +5,146 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CSW 7-Letter Words</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: #0d1117;
-            color: #c9d1d9;
+            max-width: 800px;
+            margin: 40px auto;
             padding: 20px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .container {
-            max-width: 900px;
-            width: 100%;
+            background: #f5f5f5;
+            color: #333;
         }
         h1 {
-            font-size: 28px;
-            font-weight: 600;
+            font-size: 24px;
             text-align: center;
-            margin-bottom: 8px;
-            color: #f0f6fc;
         }
-        .subtitle {
-            text-align: center;
-            color: #8b949e;
-            font-size: 14px;
+        .info {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
             margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
         }
-        .stats {
-            background: #161b22;
-            border: 1px solid #30363d;
+        .info span {
+            font-weight: bold;
+            color: #007aff;
+        }
+        .output-container {
+            background: #1e1e1e;
             border-radius: 8px;
-            padding: 16px 20px;
-            margin-bottom: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            overflow-x: auto;
         }
-        .stats .count {
-            font-size: 20px;
-            font-weight: 600;
-            color: #58a6ff;
-        }
-        .stats .count span {
-            font-size: 28px;
-        }
-        .stats .badge {
-            background: #21262d;
-            border: 1px solid #30363d;
-            border-radius: 20px;
-            padding: 4px 14px;
+        #output {
+            color: #d4d4d4;
+            font-family: "Menlo", "Monaco", "Courier New", monospace;
             font-size: 13px;
-            color: #8b949e;
-        }
-        .output-box {
-            background: #0d1117;
-            border: 1px solid #30363d;
-            border-radius: 8px;
-            padding: 16px 0;
-            overflow: hidden;
-        }
-        .output-box pre {
-            font-family: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
-            font-size: 13px;
-            line-height: 1.6;
-            color: #e6edf3;
-            padding: 0 20px;
-            margin: 0;
             white-space: pre-wrap;
             word-wrap: break-word;
-            max-height: 70vh;
+            margin: 0;
+            min-height: 200px;
+            max-height: 600px;
             overflow-y: auto;
-        }
-        .output-box pre .line-num {
-            color: #484f58;
-            user-select: none;
-            margin-right: 16px;
-        }
-        .output-box pre .string {
-            color: #a5d6ff;
-        }
-        .output-box pre .bracket {
-            color: #ffa657;
         }
         .loading {
             text-align: center;
-            padding: 40px 20px;
-            color: #8b949e;
+            color: #888;
+            padding: 30px;
         }
-        .loading .spinner {
+        .error {
+            color: #ff6b6b;
+            text-align: center;
+            padding: 20px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 15px;
+            color: #888;
+            font-size: 12px;
+        }
+        .badge {
             display: inline-block;
+            background: #007aff;
+            color: #fff;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            margin: 0 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>📝 CSW 7-Letter Words</h1>
+
+    <div class="info" id="info">
+        <span id="count">Loading...</span> words found
+    </div>
+
+    <div class="output-container">
+        <pre id="output"><div class="loading">⏳ Loading word list...</div></pre>
+    </div>
+
+    <div class="footer">
+        Source: <span id="filename">csw24.txt</span>
+    </div>
+
+    <script>
+        (async function() {
+            const outputEl = document.getElementById('output');
+            const countEl = document.getElementById('count');
+            const filenameEl = document.getElementById('filename');
+
+            const FILE_PATH = 'csw24.txt';
+
+            try {
+                // Fetch the word list
+                const response = await fetch(FILE_PATH);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: Could not load ${FILE_PATH}`);
+                }
+
+                const text = await response.text();
+
+                // Split by newlines, filter out empty lines
+                const allWords = text.split(/\r?\n/)
+                    .map(w => w.trim().toLowerCase())
+                    .filter(w => w.length > 0);
+
+                // Filter for exactly 7 letters, letters only (a-z)
+                const sevenLetterWords = allWords.filter(w => 
+                    w.length === 7 && /^[a-z]+$/.test(w)
+                );
+
+                // Sort alphabetically
+                sevenLetterWords.sort();
+
+                // Format as: [ ".", ".", ]  (each word quoted with a comma)
+                const formatted = sevenLetterWords.map(w => `  "${w}"`);
+
+                // Build the final output array format
+                let output = '[\n';
+                if (formatted.length > 0) {
+                    output += formatted.join(',\n');
+                    output += '\n';
+                }
+                output += ']';
+
+                // Display the count
+                countEl.textContent = sevenLetterWords.length.toLocaleString();
+
+                // Show the result
+                outputEl.textContent = output;
+
+            } catch (err) {
+                outputEl.innerHTML = `<div class="error">❌ Error: ${err.message}</div>`;
+                countEl.textContent = 'Error';
+                console.error(err);
+            }
+        })();
+    </script>
+
+</body>
+</html>
