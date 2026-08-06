@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSW 7-Letter Word Filter</title>
+    <title>CSW 7-Letter Words</title>
     <style>
         * {
             margin: 0;
@@ -14,10 +14,11 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: #0d1117;
             color: #c9d1d9;
+            padding: 20px;
             min-height: 100vh;
             display: flex;
-            justify-content: center;
-            padding: 20px;
+            flex-direction: column;
+            align-items: center;
         }
         .container {
             max-width: 900px;
@@ -27,62 +28,26 @@
             font-size: 28px;
             font-weight: 600;
             text-align: center;
-            margin-top: 10px;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             color: #f0f6fc;
         }
         .subtitle {
             text-align: center;
             color: #8b949e;
             font-size: 14px;
-            margin-bottom: 24px;
-        }
-        .upload-area {
-            background: #161b22;
-            border: 2px dashed #30363d;
-            border-radius: 12px;
-            padding: 40px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: border-color 0.3s, background 0.3s;
-            margin-bottom: 16px;
-        }
-        .upload-area:hover {
-            border-color: #58a6ff;
-            background: #1c2333;
-        }
-        .upload-area.dragover {
-            border-color: #58a6ff;
-            background: #1f2937;
-        }
-        .upload-area .icon {
-            font-size: 48px;
-            margin-bottom: 12px;
-        }
-        .upload-area .text {
-            font-size: 16px;
-            color: #c9d1d9;
-        }
-        .upload-area .hint {
-            font-size: 13px;
-            color: #8b949e;
-            margin-top: 8px;
-        }
-        .upload-area input[type="file"] {
-            display: none;
+            margin-bottom: 20px;
         }
         .stats {
             background: #161b22;
             border: 1px solid #30363d;
             border-radius: 8px;
-            padding: 14px 20px;
+            padding: 16px 20px;
             margin-bottom: 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 10px;
-            min-height: 52px;
         }
         .stats .count {
             font-size: 20px;
@@ -92,395 +57,48 @@
         .stats .count span {
             font-size: 28px;
         }
-        .stats .info {
-            color: #8b949e;
-            font-size: 14px;
-        }
         .stats .badge {
             background: #21262d;
             border: 1px solid #30363d;
             border-radius: 20px;
             padding: 4px 14px;
-            font-size: 12px;
+            font-size: 13px;
             color: #8b949e;
         }
         .output-box {
             background: #0d1117;
             border: 1px solid #30363d;
             border-radius: 8px;
+            padding: 16px 0;
             overflow: hidden;
-        }
-        .output-box .toolbar {
-            background: #161b22;
-            padding: 10px 16px;
-            border-bottom: 1px solid #30363d;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .output-box .toolbar .actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .output-box .toolbar button {
-            background: #21262d;
-            border: 1px solid #30363d;
-            color: #c9d1d9;
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .output-box .toolbar button:hover {
-            background: #30363d;
-        }
-        .output-box .toolbar button.primary {
-            background: #238636;
-            border-color: #238636;
-            color: #fff;
-        }
-        .output-box .toolbar button.primary:hover {
-            background: #2ea043;
         }
         .output-box pre {
             font-family: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
             font-size: 13px;
             line-height: 1.6;
             color: #e6edf3;
-            padding: 16px 20px;
+            padding: 0 20px;
             margin: 0;
             white-space: pre-wrap;
             word-wrap: break-word;
-            max-height: 60vh;
+            max-height: 70vh;
             overflow-y: auto;
-            min-height: 100px;
         }
-        .output-box pre .empty {
-            color: #8b949e;
-            text-align: center;
-            display: block;
-            padding: 30px 0;
-        }
-        .status-msg {
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            font-size: 14px;
-        }
-        .status-msg.success {
-            background: #1a3a2a;
-            border: 1px solid #238636;
-            color: #7ee787;
-        }
-        .status-msg.error {
-            background: #3d1a1a;
-            border: 1px solid #da3633;
-            color: #ff6b6b;
-        }
-        .status-msg.info {
-            background: #1a2a3a;
-            border: 1px solid #1f6feb;
-            color: #58a6ff;
-        }
-        .hidden {
-            display: none !important;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 16px;
+        .output-box pre .line-num {
             color: #484f58;
-            font-size: 12px;
+            user-select: none;
+            margin-right: 16px;
         }
-        @media (max-width: 600px) {
-            .stats {
-                flex-direction: column;
-                align-items: stretch;
-                text-align: center;
-            }
-            .output-box .toolbar {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .output-box .toolbar .actions {
-                justify-content: center;
-            }
+        .output-box pre .string {
+            color: #a5d6ff;
         }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <h1>📝 CSW 7-Letter Word Filter</h1>
-    <p class="subtitle">Upload your <code>csw24.txt</code> file — everything stays in your browser</p>
-
-    <!-- Upload Area -->
-    <div class="upload-area" id="uploadArea">
-        <div class="icon">📂</div>
-        <div class="text"><strong>Click to upload</strong> or drag &amp; drop</div>
-        <div class="hint">Supports <code>.txt</code> files with one word per line</div>
-        <input type="file" id="fileInput" accept=".txt">
-    </div>
-
-    <!-- Status Message -->
-    <div id="status" class="hidden"></div>
-
-    <!-- Stats -->
-    <div class="stats" id="stats">
-        <div class="count" id="count">📊 <span>0</span> 7-letter words</div>
-        <div class="info" id="fileInfo">No file loaded</div>
-        <div class="badge" id="wordCount">Total: 0 words</div>
-    </div>
-
-    <!-- Output -->
-    <div class="output-box">
-        <div class="toolbar">
-            <span style="font-size:13px;color:#8b949e;" id="outputLabel">Output</span>
-            <div class="actions">
-                <button id="copyBtn" disabled>📋 Copy</button>
-                <button id="downloadBtn" class="primary" disabled>⬇️ Download .txt</button>
-                <button id="downloadJsonBtn" disabled>⬇️ Download .json</button>
-            </div>
-        </div>
-        <pre id="output"><span class="empty">Upload a file to see 7-letter words</span></pre>
-    </div>
-
-    <div class="footer">🔒 Your file is processed locally — never uploaded to any server</div>
-</div>
-
-<script>
-    (function() {
-        const uploadArea = document.getElementById('uploadArea');
-        const fileInput = document.getElementById('fileInput');
-        const statusEl = document.getElementById('status');
-        const countEl = document.getElementById('count');
-        const fileInfoEl = document.getElementById('fileInfo');
-        const wordCountEl = document.getElementById('wordCount');
-        const outputEl = document.getElementById('output');
-        const outputLabel = document.getElementById('outputLabel');
-        const copyBtn = document.getElementById('copyBtn');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const downloadJsonBtn = document.getElementById('downloadJsonBtn');
-
-        let currentSevenLetterWords = [];
-        let currentFilename = '';
-
-        // --- Helper: Show status message ---
-        function showStatus(message, type = 'info') {
-            statusEl.className = `status-msg ${type}`;
-            statusEl.textContent = message;
-            statusEl.classList.remove('hidden');
+        .output-box pre .bracket {
+            color: #ffa657;
         }
-
-        function hideStatus() {
-            statusEl.classList.add('hidden');
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: #8b949e;
         }
-
-        // --- Helper: Format output ---
-        function formatOutput(words) {
-            if (!words || words.length === 0) {
-                return '[\n  // No 7-letter words found\n]';
-            }
-            const formatted = words.map(w => `  "${w}"`);
-            return '[\n' + formatted.join(',\n') + '\n]';
-        }
-
-        // --- Helper: Update UI ---
-        function updateUI(words, filename) {
-            currentSevenLetterWords = words || [];
-            currentFilename = filename || '';
-
-            const count = currentSevenLetterWords.length;
-            countEl.innerHTML = `📊 <span>${count.toLocaleString()}</span> 7-letter words`;
-
-            if (filename) {
-                fileInfoEl.textContent = `📄 ${filename}`;
-            } else {
-                fileInfoEl.textContent = 'No file loaded';
-            }
-
-            if (count > 0) {
-                outputLabel.textContent = `✅ ${count.toLocaleString()} words found`;
-                outputEl.innerHTML = formatOutput(currentSevenLetterWords);
-                copyBtn.disabled = false;
-                downloadBtn.disabled = false;
-                downloadJsonBtn.disabled = false;
-                showStatus(`✅ Found ${count.toLocaleString()} 7-letter words!`, 'success');
-            } else if (currentSevenLetterWords.length === 0 && filename) {
-                outputLabel.textContent = '⚠️ No 7-letter words';
-                outputEl.innerHTML = '<span class="empty">No 7-letter words found in this file</span>';
-                copyBtn.disabled = true;
-                downloadBtn.disabled = true;
-                downloadJsonBtn.disabled = true;
-                showStatus('⚠️ No 7-letter words found. Make sure the file has one word per line.', 'error');
-            } else {
-                outputLabel.textContent = 'Output';
-                outputEl.innerHTML = '<span class="empty">Upload a file to see 7-letter words</span>';
-                copyBtn.disabled = true;
-                downloadBtn.disabled = true;
-                downloadJsonBtn.disabled = true;
-                hideStatus();
-            }
-
-            // Update word count in badge
-            if (filename) {
-                // We'll update this when processing
-            }
-        }
-
-        // --- Process the file ---
-        function processFile(file) {
-            const reader = new FileReader();
-
-            reader.onload = function(e) {
-                try {
-                    const text = e.target.result;
-                    const totalChars = text.length;
-
-                    // Split into words (one per line)
-                    let words = text.split(/\r?\n/)
-                        .map(w => w.trim())
-                        .filter(w => w.length > 0);
-
-                    const totalWords = words.length;
-                    wordCountEl.textContent = `Total: ${totalWords.toLocaleString()} words`;
-
-                    // Filter for exactly 7 letters (a-z only, case insensitive)
-                    const sevenLetterWords = words
-                        .map(w => w.toLowerCase())
-                        .filter(w => w.length === 7 && /^[a-z]+$/.test(w))
-                        .sort();
-
-                    // Store and update
-                    updateUI(sevenLetterWords, file.name);
-
-                    // Also show total words in stats
-                    if (totalWords > 0) {
-                        fileInfoEl.textContent = `📄 ${file.name} (${totalWords.toLocaleString()} total words)`;
-                    }
-
-                } catch (err) {
-                    showStatus(`❌ Error processing file: ${err.message}`, 'error');
-                    console.error(err);
-                }
-            };
-
-            reader.onerror = function() {
-                showStatus('❌ Error reading file', 'error');
-            };
-
-            reader.readAsText(file);
-        }
-
-        // --- Handle file selection ---
-        function handleFile(file) {
-            if (!file) return;
-
-            // Check if it's a text file
-            if (!file.name.toLowerCase().endsWith('.txt')) {
-                showStatus('⚠️ Please upload a .txt file', 'error');
-                return;
-            }
-
-            hideStatus();
-            processFile(file);
-        }
-
-        // --- Click to upload ---
-        uploadArea.addEventListener('click', function(e) {
-            if (e.target === fileInput) return;
-            fileInput.click();
-        });
-
-        fileInput.addEventListener('change', function(e) {
-            if (this.files && this.files.length > 0) {
-                handleFile(this.files[0]);
-            }
-            this.value = ''; // Reset so same file can be re-uploaded
-        });
-
-        // --- Drag and drop ---
-        uploadArea.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            this.classList.add('dragover');
-        });
-
-        uploadArea.addEventListener('dragleave', function(e) {
-            e.preventDefault();
-            this.classList.remove('dragover');
-        });
-
-        uploadArea.addEventListener('drop', function(e) {
-            e.preventDefault();
-            this.classList.remove('dragover');
-            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                handleFile(e.dataTransfer.files[0]);
-            }
-        });
-
-        // --- Copy button ---
-        copyBtn.addEventListener('click', function() {
-            const text = outputEl.textContent;
-            if (text) {
-                navigator.clipboard.writeText(text).then(() => {
-                    const original = copyBtn.textContent;
-                    copyBtn.textContent = '✅ Copied!';
-                    setTimeout(() => { copyBtn.textContent = original; }, 2000);
-                }).catch(() => {
-                    // Fallback: select and copy
-                    const range = document.createRange();
-                    range.selectNode(outputEl);
-                    window.getSelection().removeAllRanges();
-                    window.getSelection().addRange(range);
-                    document.execCommand('copy');
-                    const original = copyBtn.textContent;
-                    copyBtn.textContent = '✅ Copied!';
-                    setTimeout(() => { copyBtn.textContent = original; }, 2000);
-                });
-            }
-        });
-
-        // --- Download .txt button ---
-        downloadBtn.addEventListener('click', function() {
-            if (currentSevenLetterWords.length === 0) return;
-            const content = currentSevenLetterWords.join('\n');
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            const baseName = currentFilename.replace(/\.txt$/i, '') || 'csw';
-            a.download = `${baseName}_7letter.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        });
-
-        // --- Download .json button (array format) ---
-        downloadJsonBtn.addEventListener('click', function() {
-            if (currentSevenLetterWords.length === 0) return;
-            // Format as array with quotes
-            const json = JSON.stringify(currentSevenLetterWords, null, 2);
-            const blob = new Blob([json], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            const baseName = currentFilename.replace(/\.txt$/i, '') || 'csw';
-            a.download = `${baseName}_7letter.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        });
-
-        // --- Initial state ---
-        updateUI([], '');
-
-    })();
-</script>
-
-</body>
-</html>
+        .loading .spinner {
+            display: inline-block;
