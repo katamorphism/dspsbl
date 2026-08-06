@@ -29,6 +29,32 @@
             font-weight: bold;
             color: #007aff;
         }
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .toolbar button {
+            background: #007aff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .toolbar button:hover {
+            background: #005bbf;
+        }
+        .toolbar button:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+        .toolbar button.copied {
+            background: #34c759;
+        }
         .output-container {
             background: #1e1e1e;
             border-radius: 8px;
@@ -82,6 +108,10 @@
         <span id="count">Loading...</span> words found
     </div>
 
+    <div class="toolbar">
+        <button id="copyBtn" disabled>📋 Copy All</button>
+    </div>
+
     <div class="output-container">
         <pre id="output"><div class="loading">⏳ Loading word list...</div></pre>
     </div>
@@ -95,6 +125,7 @@
             const outputEl = document.getElementById('output');
             const countEl = document.getElementById('count');
             const filenameEl = document.getElementById('filename');
+            const copyBtn = document.getElementById('copyBtn');
 
             const FILE_PATH = 'csw24.txt';
 
@@ -121,14 +152,10 @@
                 // Sort alphabetically
                 sevenLetterWords.sort();
 
-                // Format as: [ ".", ".", ]  (each word quoted with a comma)
-                const formatted = sevenLetterWords.map(w => `  "${w}"`);
-
-                // Build the final output array format
-                let output = '[\n';
-                if (formatted.length > 0) {
-                    output += formatted.join(',\n');
-                    output += '\n';
+                // Format as a SINGLE LINE: [ ".", ".", ]
+                let output = '[';
+                if (sevenLetterWords.length > 0) {
+                    output += sevenLetterWords.map(w => `"${w}"`).join(', ');
                 }
                 output += ']';
 
@@ -137,6 +164,34 @@
 
                 // Show the result
                 outputEl.textContent = output;
+
+                // Enable copy button
+                copyBtn.disabled = false;
+
+                // Copy button functionality
+                copyBtn.addEventListener('click', function() {
+                    navigator.clipboard.writeText(output).then(() => {
+                        copyBtn.textContent = '✅ Copied!';
+                        copyBtn.classList.add('copied');
+                        setTimeout(() => {
+                            copyBtn.textContent = '📋 Copy All';
+                            copyBtn.classList.remove('copied');
+                        }, 2000);
+                    }).catch(() => {
+                        // Fallback: select and copy
+                        const range = document.createRange();
+                        range.selectNode(outputEl);
+                        window.getSelection().removeAllRanges();
+                        window.getSelection().addRange(range);
+                        document.execCommand('copy');
+                        copyBtn.textContent = '✅ Copied!';
+                        copyBtn.classList.add('copied');
+                        setTimeout(() => {
+                            copyBtn.textContent = '📋 Copy All';
+                            copyBtn.classList.remove('copied');
+                        }, 2000);
+                    });
+                });
 
             } catch (err) {
                 outputEl.innerHTML = `<div class="error">❌ Error: ${err.message}</div>`;
